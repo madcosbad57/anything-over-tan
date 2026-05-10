@@ -259,7 +259,10 @@ a.card:hover .photo { transform: scale(1.02); }
     font-family: var(--serif); font-weight: 400;
     font-size: clamp(48px, 7.4vw, 132px);
     line-height: 0.92; letter-spacing: -0.018em;
-    margin: 24px 0 18px; max-width: 18ch; text-wrap: balance;
+    margin: 24px 0 18px;
+    max-width: 18ch;
+    padding-inline: clamp(12px, 2vw, 30px);
+    text-wrap: balance;
   }
   .ah__title em { color: var(--accent); }
   .ah__dek {
@@ -267,7 +270,7 @@ a.card:hover .photo { transform: scale(1.02); }
     font-size: clamp(20px, 1.9vw, 28px);
     line-height: 1.32; color: var(--ink-2); max-width: 60ch;
     margin: 0 0 32px;
-    padding-inline: clamp(8px, 1.2vw, 20px);
+    padding-inline: clamp(12px, 2vw, 30px);
     text-wrap: pretty;
   }
   .ah__bar {
@@ -695,7 +698,6 @@ a.card:hover .photo { transform: scale(1.02); }
     { id: "long",    label: "Long Reads",    href: "archive.html?cat=long" },
     { id: "photo",   label: "Photo Essays",  href: "archive.html?cat=photo" },
     { id: "buying",  label: "Buying Guides", href: "archive.html?cat=buying" },
-    { id: "culture", label: "Culture",       href: "archive.html?cat=culture" },
     { id: "watch",   label: "Watchlist",     href: "archive.html?cat=watch" },
     { id: "archive", label: "Archive",       href: "archive.html" },
     { id: "about",   label: "About",         href: "about.html" },
@@ -745,7 +747,6 @@ a.card:hover .photo { transform: scale(1.02); }
       <li><a href="archive.html?cat=long">Long Reads</a></li>
       <li><a href="archive.html?cat=photo">Photo Essays</a></li>
       <li><a href="archive.html?cat=buying">Buying Guides</a></li>
-      <li><a href="archive.html?cat=culture">Culture</a></li>
       <li><a href="archive.html?cat=watch">Watchlist</a></li>
     </ul></div>
     <div class="foot__col"><div class="foot__title">The Magazine</div><ul>
