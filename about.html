@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>About — anythingovertan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+/* ─── Shared design tokens & base for anythingovertan ─── */
+:root {
+  --bg:        oklch(0.965 0.014 78);
+  --bg-soft:   oklch(0.92  0.028 76);
+  --tan:       oklch(0.74  0.078 68);
+  --tan-deep:  oklch(0.56  0.085 55);
+  --tan-dark:  oklch(0.36  0.060 50);
+  --bg-deep:   oklch(0.16  0.012 60);
+  --ink:       oklch(0.19  0.014 60);
+  --ink-2:     oklch(0.42  0.012 60);
+  --ink-3:     oklch(0.62  0.010 60);
+  --line:      oklch(0.84  0.018 76);
+  --line-2:    oklch(0.76  0.022 76);
+  --accent:    oklch(0.56  0.220 28);
+  --accent-2:  oklch(0.64  0.200 32);
+
+  --serif: "Instrument Serif", "Times New Roman", serif;
+  --sans:  "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono:  "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --gut: 28px;
+  --pad-y: 64px;
+}
+[data-density="compact"]  { --gut: 16px; --pad-y: 40px; }
+[data-density="regular"]  { --gut: 28px; --pad-y: 64px; }
+[data-density="spacious"] { --gut: 44px; --pad-y: 96px; }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--sans); font-size: 15px; line-height: 1.45;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+::selection { background: var(--accent); color: var(--bg); }
+a { color: inherit; text-decoration: none; }
+
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none;
+  opacity: 0.06; mix-blend-mode: multiply; z-index: 9999;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+body.no-grain::before { display: none; }
+
+.container { padding-inline: clamp(20px, 4vw, 56px); }
+.rule { height: 1px; background: var(--line); }
+.rule--ink { background: var(--ink); }
+
+.display { font-family: var(--serif); font-weight: 400; line-height: 0.95; letter-spacing: -0.01em; }
+.display em, .italic { font-style: italic; }
+.display em { color: var(--accent); }
+
+.seclabel {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-2);
+  display: flex; align-items: baseline; gap: 14px;
+}
+.seclabel::before {
+  content: ""; width: 32px; height: 1px; background: var(--accent); display: inline-block;
+}
+
+/* photo placeholder */
+.photo {
+  position: relative; overflow: hidden;
+  background:
+    repeating-linear-gradient(135deg, oklch(0.78 0.018 75) 0 1px, transparent 1px 14px),
+    linear-gradient(180deg, oklch(0.84 0.020 76), oklch(0.74 0.020 76));
+  color: oklch(0.32 0.015 60);
+  display: flex; align-items: flex-end;
+  transition: transform 600ms cubic-bezier(.2,.7,.2,1);
+}
+.photo--dark {
+  background:
+    repeating-linear-gradient(135deg, oklch(0.30 0.018 70) 0 1px, transparent 1px 14px),
+    linear-gradient(180deg, oklch(0.26 0.020 70), oklch(0.18 0.020 70));
+  color: oklch(0.78 0.015 70);
+}
+.photo__cap {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+  padding: 10px 12px; text-transform: uppercase; width: 100%;
+  display: flex; justify-content: space-between; gap: 16px;
+  background: linear-gradient(0deg, rgba(0,0,0,0.16), transparent);
+}
+.photo--dark .photo__cap { color: oklch(0.86 0.010 70); }
+.photo__crop {
+  position: absolute; top: 10px; left: 10px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em;
+  border: 1px solid currentColor; padding: 2px 6px;
+  text-transform: uppercase; opacity: 0.7;
+}
+
+a.card { display: block; cursor: pointer; }
+a.card:hover .photo { transform: scale(1.02); }
+
+/* reveal */
+.reveal { opacity: 0; transform: translateY(18px);
+  transition: opacity 700ms cubic-bezier(.2,.7,.2,1), transform 700ms cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* marquee */
+@keyframes marquee {
+  from { transform: translateX(0); } to { transform: translateX(-50%); }
+}
+.marquee { display: flex; overflow: hidden;
+  border-block: 1px solid var(--ink); background: var(--ink); color: var(--bg); }
+.marquee__track { display: flex; flex-shrink: 0; gap: 56px;
+  padding: 14px 28px; white-space: nowrap;
+  animation: marquee var(--marquee-dur, 60s) linear infinite;
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+.marquee:hover .marquee__track { animation-play-state: paused; }
+.marquee__item { display: inline-flex; align-items: center; gap: 12px; }
+.marquee__item strong { color: var(--accent-2); font-weight: 500; letter-spacing: 0.14em; }
+.marquee__dot { color: var(--accent); }
+
+/* ── Masthead (shared) ─────────────────────────── */
+.mast { position: relative; }
+.mast__top {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  padding-block: 10px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--ink-2);
+}
+.mast__meta { display: flex; align-items: center; gap: 8px; }
+.mast__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+  animation: pulse 1.6s infinite; }
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 oklch(0.56 0.22 28 / 0.55); }
+  70%  { box-shadow: 0 0 0 7px oklch(0.56 0.22 28 / 0); }
+  100% { box-shadow: 0 0 0 0 oklch(0.56 0.22 28 / 0); }
+}
+.mast__issue { text-align: center; letter-spacing: 0.18em; }
+.mast__cta { text-align: right; }
+.mast__sub { color: var(--ink); cursor: pointer; }
+.mast__sub:hover { color: var(--accent); }
+
+.mast__brand {
+  display: grid; grid-template-columns: 1fr auto;
+  align-items: end; padding-block: 28px 24px; gap: 24px;
+}
+.brand {
+  display: flex; align-items: baseline; gap: 0.06em;
+  font-family: var(--serif); font-size: clamp(56px, 9vw, 140px);
+  line-height: 0.85; letter-spacing: -0.02em; color: var(--ink); cursor: default;
+}
+.brand__word { font-style: italic; }
+.brand__over {
+  font-family: var(--mono); font-style: normal; font-size: 0.18em;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2);
+  margin-inline: 0.4em 0.3em; align-self: center;
+  border: 1px solid var(--line-2); padding: 0.3em 0.6em;
+  border-radius: 999px; background: var(--bg);
+}
+.brand__word--tan { color: var(--tan-deep); }
+
+.mast__tag {
+  font-family: var(--serif); font-size: clamp(15px, 1.3vw, 19px);
+  color: var(--ink-2); text-align: right; max-width: 280px;
+  line-height: 1.25; padding-bottom: 12px;
+}
+.mast__tag em { font-style: italic; color: var(--accent); }
+
+.mast__nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-block: 14px; gap: 24px;
+}
+.mast__nav ul {
+  display: flex; gap: 28px; margin: 0; padding: 0; list-style: none;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink); flex-wrap: wrap;
+}
+.mast__nav a { padding-block: 4px; }
+.mast__nav a:hover { color: var(--accent); }
+.mast__nav a.is-active { color: var(--accent); border-bottom: 1px solid var(--accent); }
+.mast__search {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--ink-2); cursor: text;
+}
+
+/* ── Footer (shared) ───────────────────────────── */
+.foot {
+  background: var(--bg-deep); color: oklch(0.72 0.014 70);
+  padding-block: 56px 24px;
+}
+.foot__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+  gap: clamp(24px, 4vw, 56px); align-items: start;
+  padding-bottom: 48px; border-bottom: 1px solid oklch(0.30 0.012 70);
+}
+.brand--foot {
+  font-size: clamp(36px, 4.4vw, 60px);
+  color: var(--bg); margin-bottom: 16px;
+}
+.brand--foot .brand__over {
+  background: transparent; border-color: oklch(0.40 0.012 70);
+  color: oklch(0.72 0.014 70);
+}
+.brand--foot .brand__word--tan { color: var(--tan); }
+.foot__line {
+  font-family: var(--serif); font-size: 17px; line-height: 1.4;
+  max-width: 38ch; margin: 0; text-wrap: pretty;
+}
+.foot__col ul {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 8px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+.foot__col a { cursor: pointer; }
+.foot__col a:hover { color: var(--accent-2); }
+.foot__title {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--tan); margin-bottom: 16px;
+}
+.foot__base {
+  display: flex; justify-content: space-between; gap: 18px; padding-top: 18px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.10em;
+  text-transform: uppercase; color: oklch(0.55 0.012 70); flex-wrap: wrap;
+}
+.foot__motto {
+  font-style: italic; text-transform: none; letter-spacing: 0.04em;
+  font-family: var(--serif); font-size: 13px; color: var(--tan);
+}
+
+@media (max-width: 640px) {
+  .mast__top { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .mast__issue { display: none; }
+  .mast__brand { grid-template-columns: 1fr; }
+  .mast__tag { text-align: left; }
+  .foot__top { grid-template-columns: 1fr 1fr; }
+}
+
+</style>
+<style>
+  /* Manifesto hero */
+  .manif {
+    padding: 56px 0 var(--pad-y);
+    border-bottom: 1px solid var(--line);
+    position: relative; overflow: hidden;
+  }
+  .manif h1 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(64px, 11vw, 220px);
+    line-height: 0.86; letter-spacing: -0.022em;
+    margin: 24px 0 28px; max-width: 16ch;
+    text-wrap: balance;
+  }
+  .manif h1 em { color: var(--accent); }
+  .manif h1 .tan { color: var(--tan-deep); font-style: italic; }
+  .manif p {
+    font-family: var(--serif);
+    font-size: clamp(20px, 1.9vw, 30px);
+    line-height: 1.32; color: var(--ink-2); max-width: 60ch;
+    margin: 0 0 22px; text-wrap: pretty;
+  }
+  .manif p strong { color: var(--ink); font-weight: 400; font-style: italic; }
+
+  /* The constant — large featured row */
+  .constant {
+    background: var(--bg-deep); color: var(--bg);
+    padding: var(--pad-y) 0;
+    position: relative; overflow: hidden;
+  }
+  .constant::after {
+    content: "TAN";
+    position: absolute; right: -0.1em; bottom: -0.4em;
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(220px, 32vw, 540px);
+    color: oklch(0.32 0.05 60); pointer-events: none; user-select: none;
+    line-height: 0.8; letter-spacing: -0.02em;
+  }
+  .constant > .container { position: relative; z-index: 1; }
+  .constant .seclabel { color: var(--tan); }
+  .constant .seclabel::before { background: var(--tan); }
+  .constant h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(40px, 5.6vw, 96px);
+    line-height: 0.95; letter-spacing: -0.014em;
+    margin: 18px 0 24px; max-width: 18ch; text-wrap: balance;
+    color: var(--bg);
+  }
+  .constant h2 em { color: var(--tan); }
+  .constant p {
+    font-family: var(--serif); font-size: clamp(17px, 1.5vw, 22px);
+    line-height: 1.45; color: oklch(0.78 0.012 70); margin: 0 0 18px;
+    max-width: 60ch; text-wrap: pretty;
+  }
+
+  /* Spec menu — paint over tan */
+  .spec-menu {
+    padding-block: var(--pad-y);
+  }
+  .spec-menu h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(40px, 5.4vw, 88px);
+    line-height: 0.95; letter-spacing: -0.014em;
+    margin: 12px 0 14px; max-width: 18ch; text-wrap: balance;
+  }
+  .spec-menu h2 em { color: var(--accent); }
+  .spec-menu .lede {
+    font-family: var(--serif); font-size: clamp(17px, 1.4vw, 22px);
+    color: var(--ink-2); margin: 0 0 36px; max-width: 60ch; text-wrap: pretty;
+  }
+  .spec-grid {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    border: 1px solid var(--ink);
+  }
+  .swatch {
+    padding: 22px 18px; border-right: 1px solid oklch(0 0 0 / 0.2);
+    border-bottom: 1px solid oklch(0 0 0 / 0.2);
+    display: flex; flex-direction: column; gap: 24px;
+    aspect-ratio: 1.1 / 1; transition: transform 240ms;
+    cursor: pointer; position: relative; overflow: hidden;
+  }
+  .swatch:hover { transform: translateY(-2px); }
+  .swatch__name {
+    font-family: var(--serif); font-style: italic; font-size: clamp(22px, 2vw, 30px);
+    line-height: 1; letter-spacing: -0.012em;
+  }
+  .swatch__over {
+    margin-top: auto;
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em;
+    text-transform: uppercase; opacity: 0.7;
+  }
+  .swatch__hex {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.10em;
+    text-transform: uppercase; opacity: 0.55;
+  }
+  .swatch.s1 { background: oklch(0.50 0.18 28); color: #f6efe2; }
+  .swatch.s2 { background: oklch(0.32 0.04 150); color: #e8d9b3; }
+  .swatch.s3 { background: oklch(0.18 0.02 240); color: #d8c69a; }
+  .swatch.s4 { background: oklch(0.65 0.04 80); color: #2c1f10; }
+  .swatch.s5 { background: oklch(0.42 0.05 270); color: #d8c69a; }
+  .swatch.s6 { background: oklch(0.78 0.13 75); color: #2a1f12; }
+  .swatch.s7 { background: oklch(0.20 0.01 60); color: #c8a26b; }
+  .swatch.s8 { background: oklch(0.55 0.10 220); color: #e8d9b3; }
+  /* trim borders */
+  .swatch:nth-child(4n) { border-right: 0; }
+  .swatch:nth-last-child(-n+4) { border-bottom: 0; }
+
+  /* Team / masthead */
+  .team {
+    background: var(--bg-soft);
+    padding-block: var(--pad-y);
+    border-block: 1px solid var(--line);
+  }
+  .team__head { margin-bottom: 36px; }
+  .team__head h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(40px, 5vw, 76px);
+    line-height: 0.95; letter-spacing: -0.014em;
+    margin: 12px 0 14px; max-width: 22ch; text-wrap: balance;
+  }
+  .team__head h2 em { color: var(--accent); }
+  .team__head p {
+    font-family: var(--serif); font-size: clamp(16px, 1.3vw, 19px);
+    color: var(--ink-2); max-width: 60ch; margin: 0; text-wrap: pretty;
+  }
+  .team__grid {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--gut);
+  }
+  .person {
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .person__photo {
+    aspect-ratio: 4/5; width: 100%;
+    background:
+      repeating-linear-gradient(135deg, oklch(0.72 0.03 75) 0 1px, transparent 1px 14px),
+      linear-gradient(180deg, oklch(0.78 0.04 76), oklch(0.66 0.05 76));
+    position: relative; transition: transform 600ms;
+  }
+  .person:hover .person__photo { transform: scale(1.02); }
+  .person__photo .id {
+    position: absolute; bottom: 10px; left: 10px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: oklch(0.32 0.04 60);
+    background: oklch(0.95 0.012 78 / 0.9);
+    padding: 4px 8px;
+  }
+  .person__name {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: clamp(22px, 1.9vw, 28px); line-height: 1; letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .person__role {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .person__bio {
+    font-family: var(--serif); font-size: 15px;
+    color: var(--ink-2); margin: 0; line-height: 1.4; text-wrap: pretty;
+  }
+  .person__car {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--tan-dark);
+    border-top: 1px solid var(--line); padding-top: 10px;
+  }
+
+  /* tip / colophon */
+  .colophon {
+    padding-block: var(--pad-y);
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: clamp(28px, 4vw, 64px);
+    align-items: start;
+  }
+  .colophon h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(36px, 4.4vw, 64px);
+    line-height: 0.95; letter-spacing: -0.014em;
+    margin: 12px 0 16px; max-width: 18ch; text-wrap: balance;
+  }
+  .colophon h2 em { color: var(--accent); }
+  .colophon p {
+    font-family: var(--serif); font-size: clamp(16px, 1.3vw, 20px);
+    color: var(--ink-2); margin: 0 0 16px; max-width: 60ch; text-wrap: pretty;
+  }
+  .colophon a { color: var(--accent); border-bottom: 1px solid currentColor; }
+
+  .colo-fact {
+    border: 1px solid var(--ink);
+    padding: 28px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .colo-fact .row {
+    display: grid; grid-template-columns: 110px 1fr; gap: 18px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--line);
+  }
+  .colo-fact .row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .colo-fact .k {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .colo-fact .v {
+    font-family: var(--serif); font-size: 16px; color: var(--ink); text-wrap: pretty;
+  }
+  .colo-fact .v em { font-style: italic; color: var(--accent); }
+
+  @media (max-width: 1000px) {
+    .spec-grid { grid-template-columns: 1fr 1fr; }
+    .swatch { aspect-ratio: 1.4 / 1; }
+    .swatch:nth-child(4n) { border-right: 1px solid oklch(0 0 0 / 0.2); }
+    .swatch:nth-child(2n) { border-right: 0; }
+    .swatch:nth-last-child(-n+2) { border-bottom: 0; }
+    .team__grid { grid-template-columns: 1fr 1fr; }
+    .colophon { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .spec-grid { grid-template-columns: 1fr; }
+    .swatch { aspect-ratio: 2 / 1; border-right: 0 !important; }
+    .swatch:not(:last-child) { border-bottom: 1px solid oklch(0 0 0 / 0.2); }
+    .team__grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body data-page="about">
+
+<div data-mast></div>
+
+<section class="manif container">
+  <div class="seclabel reveal in">About · The Manifesto</div>
+  <h1 class="reveal in">
+    Any color you like — <em>as long as it's <span class="tan">over tan</span>.</em>
+  </h1>
+  <p class="reveal in">
+    <strong>anythingovertan</strong> is a long-form blog about cars worth buying. We celebrate one specific kind of decision — the one where a thoughtful enthusiast picks a paint color, then quietly insists, against the dealer, against fashion, sometimes against their spouse, that the interior must be tan.
+  </p>
+  <p class="reveal in">
+    It is not about the leather. It is about what the leather tells you. A car ordered with a saddle interior was ordered by someone who planned to keep it. Someone who looked at the spec sheet, saw the boring black option that depreciates the slowest, and ordered cognac anyway. We are interested in those people, and we are interested in the cars they bought.
+  </p>
+</section>
+
+<section class="constant">
+  <div class="container reveal">
+    <div class="seclabel">The Constant</div>
+    <h2>Tan is the <em>thread</em> that ties twenty-five years of <em>good taste</em> together.</h2>
+    <p>From a 993 Carrera 4S in Polar Silver, to an E39 Touring in Oxford Green, to a Defender 110 in Coniston, to a 996 Carrera in (yes) Guards Red — the cars we love most are connected by a single design choice. A warm interior. A reason to look down at the dashboard. Every story we publish leads with a "[paint] over Tan" spec line, because the spec is the story.</p>
+    <p>This is not nostalgia. There are tan-on-tan cars rolling out of factories in Stuttgart and Goodwood right now. The choice is, has always been, and will continue to be, available. We are simply here to argue, at length, that you should make it.</p>
+  </div>
+</section>
+
+<section class="spec-menu container">
+  <div class="seclabel reveal">The Spec Menu</div>
+  <h2 class="reveal">Eight paints. <em>One interior</em>.</h2>
+  <p class="lede reveal">A non-exhaustive sampling of exterior colors we have, on these pages, written words in defense of. Each one ordered with a saddle, cognac, or natural-grain tan leather interior. Anything else is, frankly, beside the point.</p>
+
+  <div class="spec-grid reveal">
+    <div class="swatch s1">
+      <div class="swatch__name">Guards Red</div>
+      <div>
+        <div class="swatch__over">over Tan</div>
+        <div class="swatch__hex">Porsche · 996 / 993 / 964</div>
+      </div>
+    </div>
+    <div class="swatch s2">
+      <div class="swatch__name">British Racing Green</div>
+      <div>
+        <div class="swatch__over">over Tan</div>
+        <div class="swatch__hex">Aston / Jaguar / Caterham</div>
+      </div>
+    </div>
+    <div class="swatch s3">
+      <div class="swatch__name">Oxford Green</div>
+      <div>
+        <div class="swatch__over">over Tan</div>
+        <div class="swatch__hex">BMW E39 / E34</div>
+      </div>
+    </div>
+    <div class="swatch s4">
+      <div class="swatch__name">Champagne</div>
+      <div>
+        <div class="swatch__over">over Tan</div>
+        <div class="swatch__hex">Mercedes 124 / 126</div>
+      </div>
+    </div>
+    <div class="swatch s5">
+      <div class="swatch__name">Petrol Mica</div>
+      <div>
+        <div class="swatch__over">over Tan</div>
+        <div class="swatch__hex">Porsche 996 / Cayman</div>
+      </div>
+    </div>
+    <div class="swatch s6">
+      <div class="swatch__name">Valencia Orange</div>
+      <div>
+        <div class="swatch__over">over Tan</div>
+        <div class="swatch__hex">BMW 1M / Z4 GTS</div>
+      </div>
+    </div>
+    <div class="swatch s7">
+      <div class="swatch__name">Black Onyx</div>
+      <div>
+        <div class="swatch__over">over Tan</div>
+        <div class="swatch__hex">Lexus SC430 / LS400</div>
+      </div>
+    </div>
+    <div class="swatch s8">
+      <div class="swatch__name">Coniston Blue</div>
+      <div>
+        <div class="swatch__over">over Tan</div>
+        <div class="swatch__hex">Defender / Range Rover</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="team">
+  <div class="container">
+    <div class="team__head reveal">
+      <div class="seclabel">The Masthead</div>
+      <h2>Six people, <em>one editorial line</em>.</h2>
+      <p>We are a small, fully-distributed team of writers and photographers. Every story is reported, written, photographed, and driven by one of us. We do not run sponsored content, and we do not take press cars longer than 72 hours.</p>
+    </div>
+    <div class="team__grid">
+      <article class="person reveal">
+        <div class="person__photo"><span class="id">M.V. · Marin</span></div>
+        <div class="person__role">Editor at large</div>
+        <h3 class="person__name">Marco Vieth</h3>
+        <p class="person__bio">Long-form features. Writes from a leaky garage in Marin County. Owns a 1991 BMW 850i.</p>
+        <div class="person__car">Daily: Mercedes 300CE · over Tan</div>
+      </article>
+      <article class="person reveal">
+        <div class="person__photo"><span class="id">K.H. · Carmel</span></div>
+        <div class="person__role">Photo editor</div>
+        <h3 class="person__name">K. Halloran</h3>
+        <p class="person__bio">Shoots all of our covers and most of our essays. Loyal Fujifilm convert. Will die on the Provia 100F hill.</p>
+        <div class="person__car">Daily: Saab 900 Turbo · over Tan</div>
+      </article>
+      <article class="person reveal">
+        <div class="person__photo"><span class="id">S.O. · Brooklyn</span></div>
+        <div class="person__role">Senior writer</div>
+        <h3 class="person__name">S. Okafor</h3>
+        <p class="person__bio">Buying guides and the spreadsheet behind the watchlist. Has read every Bring a Trailer comment, regrettably.</p>
+        <div class="person__car">Daily: Volvo 240 wagon · over Tan</div>
+      </article>
+      <article class="person reveal">
+        <div class="person__photo"><span class="id">T.R. · Pasadena</span></div>
+        <div class="person__role">Contributing writer</div>
+        <h3 class="person__name">T. Reyes</h3>
+        <p class="person__bio">Boulevard cars, soft-tops, the Lexus SC. Believes the LS400 is one of the great unwritten novels.</p>
+        <div class="person__car">Daily: Lexus SC400 · over Tan</div>
+      </article>
+      <article class="person reveal">
+        <div class="person__photo"><span class="id">J.P. · Eagle Rock</span></div>
+        <div class="person__role">Culture editor</div>
+        <h3 class="person__name">J. Park</h3>
+        <p class="person__bio">Field guides, cars-and-coffee anthropology, why Cayenne taxis are an underrated genre of automotive.</p>
+        <div class="person__car">Daily: 964 Carrera 2 · over Tan</div>
+      </article>
+      <article class="person reveal">
+        <div class="person__photo"><span class="id">D.C. · Portland</span></div>
+        <div class="person__role">Contributing writer</div>
+        <h3 class="person__name">D. Chen</h3>
+        <p class="person__bio">Wagons, three-pedal sleepers, anything with a roof rack. Writes the only honest used-car listing reviews on the internet.</p>
+        <div class="person__car">Daily: Audi RS6 Avant · over Tan</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="container colophon" id="tip">
+  <div>
+    <div class="seclabel reveal">Submit · Pitch · Tip</div>
+    <h2 class="reveal">Saw a clean spec on a forecourt? <em>Tell us.</em></h2>
+    <p class="reveal">We crowdsource a meaningful chunk of the watchlist from readers. If you've found a clean, well-priced car in a thoughtful color combination, send us a link and a sentence. If we run it, you get a print issue.</p>
+    <p class="reveal">For pitches: 800–4,000 word features, original photography preferred but not required. We pay industry rate. We respond within seven days. Email <a href="mailto:tips@anythingovertan.com">tips@anythingovertan.com</a> with a subject line that starts with "[paint] over [interior]".</p>
+  </div>
+  <aside class="colo-fact reveal">
+    <div class="row"><span class="k">Founded</span><span class="v">2022, in <em>Marin County</em></span></div>
+    <div class="row"><span class="k">Cadence</span><span class="v">Six issues a year, plus weekly digital</span></div>
+    <div class="row"><span class="k">Readers</span><span class="v">14,082 paid · 41,200 free</span></div>
+    <div class="row"><span class="k">Set in</span><span class="v">Instrument Serif & Helvetica Neue</span></div>
+    <div class="row"><span class="k">Photographed on</span><span class="v">Fujifilm X-T5, mostly</span></div>
+    <div class="row"><span class="k">Owners</span><span class="v">Reader-funded. <em>No outside investment.</em></span></div>
+  </aside>
+</section>
+
+<div data-foot></div>
+<script>
+// shared chrome — injects masthead + footer + ticker into pages
+(function() {
+  const NAV = [
+    { id: "long",    label: "Long Reads",    href: "archive.html?cat=long" },
+    { id: "photo",   label: "Photo Essays",  href: "archive.html?cat=photo" },
+    { id: "buying",  label: "Buying Guides", href: "archive.html?cat=buying" },
+    { id: "culture", label: "Culture",       href: "archive.html?cat=culture" },
+    { id: "watch",   label: "Watchlist",     href: "archive.html?cat=watch" },
+    { id: "archive", label: "Archive",       href: "archive.html" },
+    { id: "about",   label: "About",         href: "about.html" },
+  ];
+
+  const here = document.body.dataset.page || "";
+  const navHTML = NAV.map(n =>
+    `<li><a href="${n.href}" class="${n.id === here ? "is-active" : ""}">${n.label}</a></li>`
+  ).join("");
+
+  const mast = `
+<header class="mast">
+  <div class="mast__top container">
+    <div class="mast__meta"><span class="mast__dot"></span> Live · <span data-clock>10:14:02</span> PST</div>
+    <div class="mast__issue">Issue 014 · May 2026</div>
+    <div class="mast__cta"><a class="mast__sub" href="index.html#subscribe">Subscribe →</a></div>
+  </div>
+  <div class="rule rule--ink"></div>
+  <div class="mast__brand container">
+    <a href="index.html" class="brand">
+      <span class="brand__word">anything</span>
+      <span class="brand__over">over</span>
+      <span class="brand__word brand__word--tan">tan</span>
+    </a>
+    <div class="mast__tag">Any color you like — <em>as long as it's over tan.</em></div>
+  </div>
+  <div class="rule"></div>
+  <nav class="mast__nav container">
+    <ul>${navHTML}</ul>
+    <div class="mast__search">⌕  Search the archive</div>
+  </nav>
+  <div class="rule"></div>
+</header>`;
+
+  const foot = `
+<footer class="foot">
+  <div class="foot__top container">
+    <div class="foot__brand">
+      <div class="brand brand--foot">
+        <span class="brand__word">anything</span>
+        <span class="brand__over">over</span>
+        <span class="brand__word brand__word--tan">tan</span>
+      </div>
+      <p class="foot__line">A long-form blog about cars worth buying, written by people who actually drive them. Independent. Reader-funded.</p>
+    </div>
+    <div class="foot__col"><div class="foot__title">Sections</div><ul>
+      <li><a href="archive.html?cat=long">Long Reads</a></li>
+      <li><a href="archive.html?cat=photo">Photo Essays</a></li>
+      <li><a href="archive.html?cat=buying">Buying Guides</a></li>
+      <li><a href="archive.html?cat=culture">Culture</a></li>
+      <li><a href="archive.html?cat=watch">Watchlist</a></li>
+    </ul></div>
+    <div class="foot__col"><div class="foot__title">The Magazine</div><ul>
+      <li><a href="archive.html">Issue 014 (Current)</a></li>
+      <li><a href="archive.html">Archive</a></li>
+      <li><a href="archive.html">Print Annual</a></li>
+      <li><a href="about.html#tip">Submit a tip</a></li>
+    </ul></div>
+    <div class="foot__col"><div class="foot__title">Elsewhere</div><ul>
+      <li><a>Instagram</a></li><li><a>RSS</a></li><li><a>Mastodon</a></li><li><a>Bluesky</a></li>
+    </ul></div>
+  </div>
+  <div class="foot__base container">
+    <span>© 2026 anythingovertan ltd.</span>
+    <span class="foot__motto">Any color you like, as long as it's over tan.</span>
+    <span>Set in Instrument Serif & Helvetica. Photographed on Fujifilm.</span>
+  </div>
+</footer>`;
+
+  // mount
+  const mount = (sel, html) => {
+    const el = document.querySelector(sel);
+    if (el) el.innerHTML = html;
+  };
+  mount("[data-mast]", mast);
+  mount("[data-foot]", foot);
+
+  // live clock
+  const fmtClock = d => d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+  const tickClock = () => {
+    document.querySelectorAll("[data-clock]").forEach(el => el.textContent = fmtClock(new Date()));
+  };
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  // scroll reveal
+  const io = new IntersectionObserver((ents) => {
+    ents.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+  document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+})();
+
+</script>
+</body>
+</html>
