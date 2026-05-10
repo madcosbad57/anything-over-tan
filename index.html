@@ -1570,14 +1570,14 @@ Object.assign(window, {
 <script type="text/babel" data-presets="env,react">
 // content for anythingovertan — every story carries a [paint] OVER TAN spec line
 const HERO = {
-  kicker: "Issue 014 · Long Read",
+  kicker: "Issue 015 · Long Read",
   spec: "Guards Red Over Tan",
-  title: ["The 996 Generation:", <em key="i">Porsche's runt grows up</em>],
-  dek: "For two decades, fried-egg headlights and a switch to water-cooling kept the 996 in the bargain bin. The smart money is already gone — here's the case for buying what's left.",
+  title: ["Jaguar F-Type:", <em key="i">the modern British bruiser</em>],
+  dek: "Shot in France at Les Amis du Circuit de Gueux, this Guards Red F-Type over tan captures exactly what we chase: dramatic lines, open road energy, and a spec worth talking about.",
   byline: "Marco Vieth",
   date: "May 8, 2026",
   read: "18 min",
-  shot: { film: "Provia 100F", lens: "XF 23mm f/2", loc: "Carmel Valley, CA", frame: "04 / 36" },
+  shot: { film: "Provia 100F", lens: "XF 23mm f/2", loc: "Les Amis du Circuit de Gueux, France", frame: "04 / 36" },
 };
 
 const TICKER = [
@@ -1734,7 +1734,7 @@ function Masthead({ sections }) {
         <div className="mast__meta">
           <span className="mast__dot" /> Live · {now} PST
         </div>
-        <div className="mast__issue">Issue 014 · May 2026</div>
+        <div className="mast__issue">Issue 015 · May 2026</div>
         <div className="mast__cta">
           <a className="mast__sub" href="#subscribe">Subscribe →</a>
         </div>
@@ -1792,11 +1792,11 @@ function Hero({ data }) {
             dark
             className="hero__photo"
             film={data.shot.film}
-            subj="996.1 Carrera"
+            subj="Jaguar F-Type"
             loc={data.shot.loc}
             frame={data.shot.frame}
             imageSrc="assets/hero-car.png"
-            imageAlt="Red convertible parked in front of vintage service station."
+            imageAlt="Guards Red Jaguar F-Type with tan interior at Les Amis du Circuit de Gueux in France."
           >
             <div className="hero__overlay">
               <div className="hero__filmStrip">
@@ -1809,7 +1809,7 @@ function Hero({ data }) {
           </Photo>
           <div className="hero__caption">
             <span className="hero__caption-num">01 / 14</span>
-            <span>Photographed by K. Halloran for anythingovertan, Issue 014</span>
+            <span>Photographed by K. Halloran for anythingovertan, Issue 015</span>
           </div>
         </div>
 
@@ -2063,7 +2063,7 @@ function Footer() {
         </div>
         <FootCol title="Sections" items={["Long Reads", "Photo Essays", "Buying Guides", "Culture", "Watchlist"]} />
         <FootCol title="The Magazine" items={[
-          { label: "Issue 014 (Current)", href: "#" },
+          { label: "Issue 015 (Current)", href: "#" },
           { label: "Archive", href: "archive.html" },
           { label: "About", href: "about.html" },
           { label: "Submit a tip", href: "about.html#tip" },
