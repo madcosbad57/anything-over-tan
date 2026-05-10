@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Salsa over Tan: A Jaguar F-Type at Gueux — anythingovertan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+/* ─── Shared design tokens & base for anythingovertan ─── */
+:root {
+  --bg:        oklch(0.965 0.014 78);
+  --bg-soft:   oklch(0.92  0.028 76);
+  --tan:       oklch(0.74  0.078 68);
+  --tan-deep:  oklch(0.56  0.085 55);
+  --tan-dark:  oklch(0.36  0.060 50);
+  --bg-deep:   oklch(0.16  0.012 60);
+  --ink:       oklch(0.19  0.014 60);
+  --ink-2:     oklch(0.42  0.012 60);
+  --ink-3:     oklch(0.62  0.010 60);
+  --line:      oklch(0.84  0.018 76);
+  --line-2:    oklch(0.76  0.022 76);
+  --accent:    oklch(0.56  0.220 28);
+  --accent-2:  oklch(0.64  0.200 32);
+
+  --serif: "Instrument Serif", "Times New Roman", serif;
+  --sans:  "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono:  "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --gut: 28px;
+  --pad-y: 64px;
+}
+[data-density="compact"]  { --gut: 16px; --pad-y: 40px; }
+[data-density="regular"]  { --gut: 28px; --pad-y: 64px; }
+[data-density="spacious"] { --gut: 44px; --pad-y: 96px; }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--sans); font-size: 15px; line-height: 1.45;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+::selection { background: var(--accent); color: var(--bg); }
+a { color: inherit; text-decoration: none; }
+
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none;
+  opacity: 0.06; mix-blend-mode: multiply; z-index: 9999;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+body.no-grain::before { display: none; }
+
+.container { padding-inline: clamp(20px, 4vw, 56px); }
+.rule { height: 1px; background: var(--line); }
+.rule--ink { background: var(--ink); }
+
+.display { font-family: var(--serif); font-weight: 400; line-height: 0.95; letter-spacing: -0.01em; }
+.display em, .italic { font-style: italic; }
+.display em { color: var(--accent); }
+
+.seclabel {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-2);
+  display: flex; align-items: baseline; gap: 14px;
+}
+.seclabel::before {
+  content: ""; width: 32px; height: 1px; background: var(--accent); display: inline-block;
+}
+
+/* photo placeholder */
+.photo {
+  position: relative; overflow: hidden;
+  background:
+    repeating-linear-gradient(135deg, oklch(0.78 0.018 75) 0 1px, transparent 1px 14px),
+    linear-gradient(180deg, oklch(0.84 0.020 76), oklch(0.74 0.020 76));
+  color: oklch(0.32 0.015 60);
+  display: flex; align-items: flex-end;
+  transition: transform 600ms cubic-bezier(.2,.7,.2,1);
+}
+.photo--dark {
+  background:
+    repeating-linear-gradient(135deg, oklch(0.30 0.018 70) 0 1px, transparent 1px 14px),
+    linear-gradient(180deg, oklch(0.26 0.020 70), oklch(0.18 0.020 70));
+  color: oklch(0.78 0.015 70);
+}
+.photo__cap {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+  padding: 10px 12px; text-transform: uppercase; width: 100%;
+  display: flex; justify-content: space-between; gap: 16px;
+  background: linear-gradient(0deg, rgba(0,0,0,0.16), transparent);
+}
+.photo--dark .photo__cap { color: oklch(0.86 0.010 70); }
+.photo__crop {
+  position: absolute; top: 10px; left: 10px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em;
+  border: 1px solid currentColor; padding: 2px 6px;
+  text-transform: uppercase; opacity: 0.7;
+}
+
+a.card { display: block; cursor: pointer; }
+a.card:hover .photo { transform: scale(1.02); }
+
+/* reveal */
+.reveal { opacity: 0; transform: translateY(18px);
+  transition: opacity 700ms cubic-bezier(.2,.7,.2,1), transform 700ms cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* marquee */
+@keyframes marquee {
+  from { transform: translateX(0); } to { transform: translateX(-50%); }
+}
+.marquee { display: flex; overflow: hidden;
+  border-block: 1px solid var(--ink); background: var(--ink); color: var(--bg); }
+.marquee__track { display: flex; flex-shrink: 0; gap: 56px;
+  padding: 14px 28px; white-space: nowrap;
+  animation: marquee var(--marquee-dur, 60s) linear infinite;
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+.marquee:hover .marquee__track { animation-play-state: paused; }
+.marquee__item { display: inline-flex; align-items: center; gap: 12px; }
+.marquee__item strong { color: var(--accent-2); font-weight: 500; letter-spacing: 0.14em; }
+.marquee__dot { color: var(--accent); }
+
+/* ── Masthead (shared) ─────────────────────────── */
+.mast { position: relative; }
+.mast__top {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  padding-block: 10px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--ink-2);
+}
+.mast__meta { display: flex; align-items: center; gap: 8px; }
+.mast__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+  animation: pulse 1.6s infinite; }
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 oklch(0.56 0.22 28 / 0.55); }
+  70%  { box-shadow: 0 0 0 7px oklch(0.56 0.22 28 / 0); }
+  100% { box-shadow: 0 0 0 0 oklch(0.56 0.22 28 / 0); }
+}
+.mast__issue { text-align: center; letter-spacing: 0.18em; }
+.mast__cta { text-align: right; }
+.mast__sub { color: var(--ink); cursor: pointer; }
+.mast__sub:hover { color: var(--accent); }
+
+.mast__brand {
+  display: grid; grid-template-columns: 1fr auto;
+  align-items: end; padding-block: 28px 24px; gap: 24px;
+}
+.brand {
+  display: flex; align-items: baseline; gap: 0.06em;
+  font-family: var(--serif); font-size: clamp(56px, 9vw, 140px);
+  line-height: 0.85; letter-spacing: -0.02em; color: var(--ink); cursor: default;
+}
+.brand__word { font-style: italic; }
+.brand__over {
+  font-family: var(--mono); font-style: normal; font-size: 0.18em;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2);
+  margin-inline: 0.4em 0.3em; align-self: center;
+  border: 1px solid var(--line-2); padding: 0.3em 0.6em;
+  border-radius: 999px; background: var(--bg);
+}
+.brand__word--tan { color: var(--tan-deep); }
+
+.mast__tag {
+  font-family: var(--serif); font-size: clamp(15px, 1.3vw, 19px);
+  color: var(--ink-2); text-align: right; max-width: 280px;
+  line-height: 1.25; padding-bottom: 12px;
+}
+.mast__tag em { font-style: italic; color: var(--accent); }
+
+.mast__nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-block: 14px; gap: 24px;
+}
+.mast__nav ul {
+  display: flex; gap: 28px; margin: 0; padding: 0; list-style: none;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink); flex-wrap: wrap;
+}
+.mast__nav a { padding-block: 4px; }
+.mast__nav a:hover { color: var(--accent); }
+.mast__nav a.is-active { color: var(--accent); border-bottom: 1px solid var(--accent); }
+.mast__search {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--ink-2); cursor: text;
+}
+
+/* ── Footer (shared) ───────────────────────────── */
+.foot {
+  background: var(--bg-deep); color: oklch(0.72 0.014 70);
+  padding-block: 56px 24px;
+}
+.foot__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+  gap: clamp(24px, 4vw, 56px); align-items: start;
+  padding-bottom: 48px; border-bottom: 1px solid oklch(0.30 0.012 70);
+}
+.brand--foot {
+  font-size: clamp(36px, 4.4vw, 60px);
+  color: var(--bg); margin-bottom: 16px;
+}
+.brand--foot .brand__over {
+  background: transparent; border-color: oklch(0.40 0.012 70);
+  color: oklch(0.72 0.014 70);
+}
+.brand--foot .brand__word--tan { color: var(--tan); }
+.foot__line {
+  font-family: var(--serif); font-size: 17px; line-height: 1.4;
+  max-width: 38ch; margin: 0; text-wrap: pretty;
+}
+.foot__col ul {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 8px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+.foot__col a { cursor: pointer; }
+.foot__col a:hover { color: var(--accent-2); }
+.foot__title {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--tan); margin-bottom: 16px;
+}
+.foot__base {
+  display: flex; justify-content: space-between; gap: 18px; padding-top: 18px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.10em;
+  text-transform: uppercase; color: oklch(0.55 0.012 70); flex-wrap: wrap;
+}
+.foot__motto {
+  font-style: italic; text-transform: none; letter-spacing: 0.04em;
+  font-family: var(--serif); font-size: 13px; color: var(--tan);
+}
+
+@media (max-width: 640px) {
+  .mast__top { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .mast__issue { display: none; }
+  .mast__brand { grid-template-columns: 1fr; }
+  .mast__tag { text-align: left; }
+  .foot__top { grid-template-columns: 1fr 1fr; }
+}
+
+</style>
+<style>
+  /* ── Article-specific layout ── */
+  .article-hero {
+    padding: 36px 0 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .ah__crumb {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-2);
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  }
+  .ah__crumb .sep { color: var(--ink-3); }
+  .ah__crumb a:hover { color: var(--accent); }
+  .ah__current { color: var(--accent); }
+  .ah__title {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(48px, 7.4vw, 132px);
+    line-height: 0.92; letter-spacing: -0.018em;
+    margin: 24px 0 18px; max-width: 18ch; text-wrap: balance;
+  }
+  .ah__title em { color: var(--accent); }
+  .ah__dek {
+    font-family: var(--serif);
+    font-size: clamp(20px, 1.9vw, 28px);
+    line-height: 1.32; color: var(--ink-2); max-width: 60ch;
+    margin: 0 0 32px;
+    padding-inline: clamp(8px, 1.2vw, 20px);
+    text-wrap: pretty;
+  }
+  .ah__bar {
+    display: grid;
+    grid-template-columns: auto auto auto 1fr auto;
+    gap: clamp(20px, 3vw, 48px);
+    align-items: end;
+    padding-block: 22px;
+    border-block: 1px solid var(--line);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--ink-2);
+  }
+  .ah__bar .field { display: flex; flex-direction: column; gap: 4px; }
+  .ah__bar .field .k { color: var(--ink-3); font-size: 9px; letter-spacing: 0.16em; }
+  .ah__bar .field .v { color: var(--ink); font-family: var(--serif); font-size: 18px; letter-spacing: 0; text-transform: none; }
+  .ah__spec {
+    background: var(--tan); color: oklch(0.20 0.04 60);
+    padding: 8px 14px; border-radius: 999px;
+    font-weight: 500; letter-spacing: 0.12em;
+    font-size: 11px;
+  }
+  .ah__photo {
+    aspect-ratio: 21 / 9; width: 100%; margin-top: 0;
+  }
+  .ah__photo img.ah__realimg {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .ah__photo .photo__overlay {
+    position: absolute; bottom: 18px; right: 18px;
+    display: flex; flex-direction: column; gap: 3px; align-items: flex-end;
+    background: rgba(0,0,0,0.36); border: 1px solid rgba(255,255,255,0.16);
+    padding: 10px 14px; backdrop-filter: blur(2px);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.10em;
+    text-transform: uppercase; color: oklch(0.86 0.012 70);
+  }
+  .ah__photo .photo__overlay .h { color: var(--accent-2); font-weight: 500; }
+  .ah__photocap {
+    display: flex; justify-content: space-between; padding: 12px 0 24px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--ink-2);
+  }
+  .ah__photocap strong { color: var(--ink); font-weight: 500; }
+
+  /* article body */
+  .article-body {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 740px) 1fr;
+    padding: var(--pad-y) 0;
+    column-gap: 0;
+  }
+  .article-body > * { grid-column: 2; padding-inline: clamp(20px, 4vw, 0px); }
+  .article-body > .full { grid-column: 1 / -1; }
+
+  .ab__lead p {
+    font-family: var(--serif);
+    font-size: clamp(20px, 1.7vw, 24px);
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 0 0 28px;
+    text-wrap: pretty;
+  }
+  .ab__lead p:first-child::first-letter {
+    font-family: var(--serif); font-style: italic; color: var(--accent);
+    font-size: 5.6em; line-height: 0.85;
+    float: left; padding: 4px 14px 0 0; margin-top: 4px;
+  }
+  .article-body h2 {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: clamp(32px, 3.2vw, 48px);
+    line-height: 1; letter-spacing: -0.012em;
+    margin: 48px 0 18px; text-wrap: balance;
+  }
+  .article-body h2 em { color: var(--accent); }
+  .article-body p {
+    font-size: 17px; line-height: 1.65; margin: 0 0 22px;
+    color: var(--ink); max-width: 64ch; text-wrap: pretty;
+  }
+  .article-body p strong { color: var(--ink); font-weight: 500; }
+  .article-body a { color: var(--accent); border-bottom: 1px solid currentColor; }
+
+  blockquote.pull {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: clamp(28px, 3vw, 44px);
+    line-height: 1.15; letter-spacing: -0.01em;
+    border-left: 3px solid var(--accent);
+    padding: 8px 0 8px 28px;
+    margin: 36px 0; color: var(--ink);
+    max-width: 32ch; text-wrap: balance;
+  }
+  blockquote.pull cite {
+    display: block; margin-top: 14px;
+    font-family: var(--mono); font-style: normal;
+    font-size: 11px; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+
+  .ab__photo {
+    grid-column: 1 / -1;
+    margin: 36px 0;
+  }
+  .ab__photo .photo {
+    aspect-ratio: 16 / 9; width: 100%;
+  }
+  .ab__photo .cap {
+    max-width: 740px; margin: 12px auto 0;
+    padding-inline: clamp(20px, 4vw, 0px);
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-2);
+    display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  }
+  .ab__photo .cap strong { color: var(--ink); }
+
+  /* spec card embedded mid-article */
+  .speccard {
+    background: var(--bg-deep); color: var(--bg);
+    padding: clamp(28px, 3.6vw, 48px);
+    margin: 48px 0; border: 1px solid var(--bg-deep);
+    display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: clamp(28px, 4vw, 56px); align-items: end;
+  }
+  .speccard__lab {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--accent-2); margin-bottom: 14px;
+  }
+  .speccard__lab::before { background: var(--tan); }
+  .speccard h3 {
+    font-family: var(--serif); font-weight: 400; font-style: italic;
+    font-size: clamp(32px, 3.6vw, 52px);
+    line-height: 0.96; letter-spacing: -0.014em;
+    margin: 0 0 14px; color: var(--bg);
+  }
+  .speccard p {
+    font-family: var(--serif); font-size: clamp(17px, 1.4vw, 21px);
+    line-height: 1.4; color: oklch(0.78 0.012 70); margin: 0; max-width: 38ch;
+  }
+  .speccard__grid {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 28px;
+    border-top: 1px solid oklch(0.30 0.012 70);
+    padding-top: 22px;
+  }
+  .speccard__grid .row { display: flex; flex-direction: column; gap: 4px; }
+  .speccard__grid .k {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--tan);
+  }
+  .speccard__grid .v {
+    font-family: var(--serif); font-size: clamp(20px, 1.6vw, 26px);
+    color: var(--bg); letter-spacing: -0.005em;
+  }
+  .speccard__grid .v small {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.10em;
+    color: oklch(0.65 0.012 70); margin-left: 6px; text-transform: uppercase;
+  }
+
+  /* verdict box */
+  .verdict {
+    border: 1px solid var(--ink); padding: clamp(28px, 3.6vw, 48px);
+    margin: 56px 0 0; display: grid;
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.5fr);
+    gap: clamp(24px, 3vw, 40px); align-items: start;
+  }
+  .verdict__stamp {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: clamp(64px, 8vw, 128px); line-height: 0.85;
+    letter-spacing: -0.02em; color: var(--accent); margin: 0;
+  }
+  .verdict__sub {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--ink-2); margin-top: 10px;
+  }
+  .verdict__body p {
+    font-family: var(--serif); font-size: clamp(17px, 1.3vw, 20px);
+    line-height: 1.45; margin: 0 0 14px; color: var(--ink); max-width: 48ch;
+  }
+  .verdict__body p:last-child { margin: 0; }
+
+  /* author footer */
+  .auth {
+    margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--line);
+    display: grid; grid-template-columns: 80px 1fr;
+    gap: 22px; align-items: start;
+  }
+  .auth__av {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--tan); color: oklch(0.20 0.04 60);
+    display: grid; place-items: center;
+    font-family: var(--serif); font-size: 36px; font-style: italic;
+  }
+  .auth__name { font-family: var(--serif); font-size: 24px; margin: 0 0 6px; }
+  .auth__bio {
+    font-family: var(--serif); font-size: 16px; color: var(--ink-2);
+    line-height: 1.45; margin: 0 0 10px; max-width: 60ch;
+  }
+  .auth__meta {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--ink-3);
+    display: flex; gap: 14px; flex-wrap: wrap;
+  }
+
+  /* related */
+  .related {
+    background: var(--bg-soft); padding: var(--pad-y) 0;
+    border-top: 1px solid var(--line);
+  }
+  .related__head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 24px; margin-bottom: 28px;
+  }
+  .related__head h2 {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: clamp(32px, 4vw, 56px); margin: 8px 0 0; letter-spacing: -0.012em;
+  }
+  .related__grid {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--gut);
+  }
+  .relcard { display: flex; flex-direction: column; gap: 12px; cursor: pointer; }
+  .relcard .photo { aspect-ratio: 4/3; width: 100%; }
+  .relcard:hover .photo { transform: scale(1.02); }
+  .relcard__meta {
+    display: flex; gap: 12px; font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2);
+  }
+  .relcard__meta .spec { color: var(--tan-dark); }
+  .relcard__title {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: clamp(22px, 1.9vw, 30px); line-height: 1; letter-spacing: -0.01em;
+    margin: 0; transition: color 200ms; text-wrap: balance;
+  }
+  .relcard:hover .relcard__title { color: var(--accent); }
+
+  /* progress bar */
+  .progress {
+    position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 100;
+    background: oklch(0.84 0.018 76 / 0.5);
+  }
+  .progress__bar {
+    height: 100%; background: var(--accent); width: 0;
+    transition: width 80ms linear;
+  }
+
+  @media (max-width: 900px) {
+    .ah__bar { grid-template-columns: 1fr 1fr; }
+    .speccard, .verdict { grid-template-columns: 1fr; }
+    .related__grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .related__grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body data-page="long">
+
+<div class="progress"><div class="progress__bar" id="progress-bar"></div></div>
+
+<div data-mast></div>
+
+<article class="article-hero container">
+  <div class="ah__crumb reveal in">
+    <a href="index.html">anythingovertan</a>
+    <span class="sep">/</span>
+    <a href="archive.html?cat=long">Long Reads</a>
+    <span class="sep">/</span>
+    <a href="archive.html?issue=15">Issue 015</a>
+    <span class="sep">/</span>
+    <span class="ah__current">A Jaguar at Gueux</span>
+  </div>
+
+  <h1 class="ah__title reveal in">Salsa over Tan: <em>a Jaguar F-Type at the Circuit de Gueux</em></h1>
+  <p class="ah__dek reveal in">A summer in a V6 convertible, a Belgian flag, and the slow, dawning realisation that the cheapest proper British sports car of the last twenty years is currently sitting in classified ads under £20,000.</p>
+
+  <div class="ah__bar reveal in">
+    <div class="field"><span class="k">By</span><span class="v italic">Marco Vieth</span></div>
+    <div class="field"><span class="k">Published</span><span class="v">May 10, 2026</span></div>
+    <div class="field"><span class="k">Read</span><span class="v">14 min · 3,640 words</span></div>
+    <div class="field"><span class="ah__spec">Salsa Red over Tan</span></div>
+    <div class="field" style="text-align:right"><span class="k">Issue</span><span class="v">№ 015</span></div>
+  </div>
+</article>
+
+<figure class="container reveal">
+  <div class="photo photo--dark ah__photo" style="padding:0; aspect-ratio: 3/2;">
+    <img class="ah__realimg" src="assets/hero-car.png" alt="Salsa Red Jaguar F-Type convertible at the old Esso/Castrol pit garages of the Circuit de Gueux, France." style="width:100%; height:100%; object-fit:cover; display:block; position:absolute; inset:0;" />
+    <div class="photo__crop" style="color:#fff; border-color:rgba(255,255,255,0.7);">07 / 36</div>
+    <div class="photo__cap"><span>Velvia 50 · F-Type V6 S Convertible</span><span>Circuit de Gueux · Reims, FR</span></div>
+    <div class="photo__overlay">
+      <span class="h">FUJIFILM X-T5</span>
+      <span>XF 35mm f/1.4 R</span>
+      <span>1/500s · f/5.6 · ISO 200</span>
+      <span>2026.07.21 · 11:42</span>
+    </div>
+  </div>
+  <div class="ah__photocap">
+    <span><strong>01</strong> · Photographed by K. Halloran for anythingovertan</span>
+    <span>Les amis du circuit de Gueux · Frame 07 of 36</span>
+  </div>
+</figure>
+
+<div class="article-body container">
+  <div class="ab__lead">
+    <p>The Belgian flag was, frankly, the giveaway. We were three days into a slow, lopsided loop through northern France — Calais to Reims, Reims to the Ardennes, the Ardennes to a hotel in Spa with a shower that didn't work — when we pulled the F-Type into the old pit lane at Gueux and found ourselves staring up at a tricolour we had not, strictly speaking, expected.</p>
+  </div>
+
+  <p>The Circuit de Gueux is not, in the technical sense, a circuit any more. It hosted the French Grand Prix six times between 1951 and 1966, then quietly stopped, and most of the road it ran on became, again, a public road. What is left is the start-finish straight, the pit garages, the timekeepers' tower, and the grandstand — preserved, lovingly, by a group of volunteers who call themselves <em>Les amis du circuit de Gueux</em>. They paint the Esso and Castrol signs every spring. They mow the grass. They are, on the day we visited, also responsible for the flagpole, which was flying Belgian for reasons no one we asked could quite explain.</p>
+
+  <p>This is the kind of place you stumble into and never quite leave. We had three hours and a half-charged camera battery. We left with most of a roll of Velvia and a stronger conviction than we'd arrived with: that the F-Type V6 convertible, currently sitting in classified ads from £20,000, is the most undervalued proper British sports car on sale today. <strong>Possibly the last one.</strong></p>
+
+  <h2>What it is, and what it isn't</h2>
+
+  <p>The F-Type was always more grand tourer than track weapon, and the V6 cars — both the 335-hp base car and the 375-hp V6 S — wear that mission better than the bigger-engined R variants ever did. The supercharged 3.0 makes the right noises (Jaguar fitted active exhaust valves on the S; tap the chequered-flag button and you can wake people up two streets over), the chassis is set up for a long sweeping bend rather than a hairpin, and the steering, while electric, is the better-judged of the two systems Jaguar shipped in this era.</p>
+
+  <p>It is also, importantly, the right shape. Ian Callum's last great Jaguar before he left the company is, depending on the angle, an E-Type that grew up, an XK that lost weight, or — at Gueux, in profile, against a row of mid-century pit garages — a car that looks like it was always meant to be parked there. The proportions are correct. The roof is canvas, not folding tin. And in Salsa Red over Tan, in summer light, against a whitewashed concrete wall painted with sixty-year-old advertisements for engine oil, it does the thing that very few modern cars manage to do: it looks like an event.</p>
+
+  <blockquote class="pull">"It looks like it was always meant to be parked there."<cite>— Notebook, Gueux pit lane, 11:42</cite></blockquote>
+
+  <p>What the F-Type isn't, and we should be honest about this, is a Porsche. The eight-speed ZF auto is a more relaxed gearbox than a PDK; the V6 cars are heavier than a Boxster S of the same vintage and a tenth or two slower in a straight line. The boot is small. The infotainment is a generation behind. None of this matters in the way the listings imply it matters.</p>
+</div>
+
+<figure class="ab__photo container reveal">
+  <div class="photo" style="padding:0; aspect-ratio: 16/9; background-image:url('assets/hero-car.png'); background-size: cover; background-position: center 28%;">
+    <div class="photo__crop" style="color:#fff; border-color:rgba(255,255,255,0.7);">12 / 36</div>
+    <div class="photo__cap"><span>Velvia 50 · F-Type V6 S</span><span>Esso / Castrol · Gueux</span></div>
+  </div>
+  <div class="cap"><span><strong>02</strong> · The pit garages at Gueux are still painted by hand, every spring.</span><span>Frame 12 of 36</span></div>
+</figure>
+
+<div class="article-body container">
+  <h2>The case for the <em>V6 convertible</em></h2>
+
+  <p>The market has, for reasons that probably involve YouTube and the V8 R's social-media legibility, decided that the F-Type you want is a coupe with the supercharged 5.0 and a manual gearbox. This is wrong on two counts. The manual was only ever fitted to the V6, the V6 R was never sold, and the V8 R is a car that — to its credit and its detriment — wants to be a Mustang most of the time. The V6 convertible is the F-Type that does the job the F-Type was designed for.</p>
+
+  <p>It is also, by some distance, the cheapest. Higher-mileage V6 S convertibles in good colours are now appearing on the major UK classifieds from <strong>around £20,000</strong>, with sub-60,000-mile cars sitting in the £24,000-28,000 band. A clean late car with a full Jaguar history, in the right spec, is a £30,000 proposition. For comparison, an equivalent-era Porsche 718 Boxster S starts at roughly £35,000 and goes up sharply from there.</p>
+
+  <p>What you are buying for that £20,000 is a 380-mile motorway cruise that doesn't tire you out, a soundtrack that is, even in the cooking V6, theatrically tuned, and a car that has - for now - no replacement on the horizon. Jaguar wound the F-Type down at the end of 2024 and confirmed there will not be another internal-combustion sports car from Coventry. The model is, as of this issue, finite.</p>
+</div>
+
+<aside class="speccard container reveal">
+  <div>
+    <div class="seclabel speccard__lab">The car we'd buy</div>
+    <h3>2015 Jaguar F-Type V6 S Convertible</h3>
+    <p>Eight-speed ZF auto. Supercharged 3.0 V6. Salsa Red over Tan leather. Active sport exhaust. Sub-60k miles, full Jaguar dealer history. The last analogue Jaguar sports car, on sale at Mazda money.</p>
+  </div>
+  <div class="speccard__grid">
+    <div class="row"><span class="k">Engine</span><span class="v">3.0 L SC V6<small>AJ126</small></span></div>
+    <div class="row"><span class="k">Power</span><span class="v">375 hp <small>@ 6,500 rpm</small></span></div>
+    <div class="row"><span class="k">0-60 mph</span><span class="v">4.8 s<small>claimed</small></span></div>
+    <div class="row"><span class="k">Gearbox</span><span class="v">8-speed ZF auto</span></div>
+    <div class="row"><span class="k">Asking</span><span class="v">£22,000<small>median, clean</small></span></div>
+    <div class="row"><span class="k">6-mo. trend</span><span class="v" style="color:var(--accent-2)">+4%<small>quietly firming</small></span></div>
+  </div>
+</aside>
+
+<div class="article-body container">
+  <h2>What to <em>look for</em>, what to <em>walk away from</em></h2>
+
+  <p>The supercharged AJ126 V6 is, by Jaguar standards, an undramatic engine to own. The water pump is the well-known service item - replace it before 60,000 miles whether it's whining or not, because when it fails it takes the timing chain with it and you write a five-figure cheque. The supercharger snout bearing on early cars is a known wear item but is straightforward to address. Ignore any car that hasn't had a recent gearbox service; the ZF unit is robust but ATF-sensitive.</p>
+
+  <p>What to walk away from: cars with patchy or absent service history (the V6 will run for a long time on neglect, and then quite suddenly stop), any convertible whose roof mechanism feels notchy in operation, and any car whose seller cannot point to a recent diff oil change. The rear differential on the four-wheel-drive cars is a separate cost centre we will not discuss here. <strong>Buy a rear-wheel-drive V6 S convertible, in a colour you'd photograph, over Tan.</strong></p>
+
+  <h2>The case, in <em>one paragraph</em></h2>
+
+  <p>The Jaguar F-Type V6 convertible is the cheapest way, in 2026, to own a proper British sports car with a real soundtrack and a roof that actually goes down. The market has not noticed because the market is busy looking at the V8 R. Buy the cleanest example you can find. Service the water pump on the way home from collecting it. And spec, if you have any say in the matter, <em>Salsa over Tan</em>.</p>
+</div>
+
+<aside class="verdict container reveal">
+  <div>
+    <p class="verdict__stamp"><em>Buy.</em></p>
+    <div class="verdict__sub">Our take · Issue 015</div>
+  </div>
+  <div class="verdict__body">
+    <p>The V6 convertible is the F-Type Jaguar should have been telling us about all along. From £20,000 it is, by a meaningful margin, the best-value modern British sports car on the market.</p>
+    <p>The model is now finite. The replacement is, by every public statement out of Coventry, electric and not coming soon. The car you want is a clean V6 S, in Salsa, over Tan - preferably parked, in the right light, somewhere that already feels like a postcard.</p>
+  </div>
+</aside>
+
+<div class="article-body container">
+  <div class="auth reveal">
+    <div class="auth__av">M</div>
+    <div>
+      <h3 class="auth__name italic">Marco Vieth</h3>
+      <p class="auth__bio">Marco writes long-form features for anythingovertan from a leaky garage in Marin County. He has owned the same 1991 BMW 850i for fourteen years and is, having driven the F-Type to Reims and back, now quietly emailing Jaguar dealers in Surrey.</p>
+      <div class="auth__meta">
+        <span>Email →</span><span>Mastodon →</span><span>Read 23 stories →</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="related">
+  <div class="container">
+    <div class="related__head reveal">
+      <div>
+        <div class="seclabel">Related Reading</div>
+        <h2>If you liked this, <em>read these</em>.</h2>
+      </div>
+      <a href="archive.html?cat=long" style="font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);border-bottom:1px solid var(--accent);padding-bottom:2px;">All long reads →</a>
+    </div>
+    <div class="related__grid">
+      <a class="relcard reveal" href="index.html">
+        <div class="photo"><div class="photo__crop">F4</div><div class="photo__cap"><span>Issue 015 · F-Type</span><span>Gueux, France</span></div></div>
+        <div class="relcard__meta"><span>Long Read · Issue 015</span><span class="spec">Salsa Red over Tan</span></div>
+        <h3 class="relcard__title">Jaguar F-Type: <em class="italic" style="color:var(--accent)">the modern British bruiser</em></h3>
+      </a>
+      <a class="relcard reveal" href="archive.html">
+        <div class="photo"><div class="photo__crop">F3</div><div class="photo__cap"><span>Pro 400H · E39 M5</span><span>Skyline Blvd</span></div></div>
+        <div class="relcard__meta"><span>Long Feature</span><span class="spec">Oxford Green over Tan</span></div>
+        <h3 class="relcard__title">The E39 M5 is <em class="italic" style="color:var(--accent)">still</em> the answer</h3>
+      </a>
+      <a class="relcard reveal" href="archive.html">
+        <div class="photo"><div class="photo__crop">F1</div><div class="photo__cap"><span>Velvia 50 · 850Ci</span><span>Sausalito</span></div></div>
+        <div class="relcard__meta"><span>Buying Guide</span><span class="spec">Nightshade over Tan</span></div>
+        <h3 class="relcard__title">Six manual <em class="italic" style="color:var(--accent)">grand tourers</em> under £40k</h3>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div data-foot></div>
+
+<script>
+// shared chrome — injects masthead + footer + ticker into pages
+(function() {
+  const NAV = [
+    { id: "long",    label: "Long Reads",    href: "archive.html?cat=long" },
+    { id: "photo",   label: "Photo Essays",  href: "archive.html?cat=photo" },
+    { id: "buying",  label: "Buying Guides", href: "archive.html?cat=buying" },
+    { id: "culture", label: "Culture",       href: "archive.html?cat=culture" },
+    { id: "watch",   label: "Watchlist",     href: "archive.html?cat=watch" },
+    { id: "archive", label: "Archive",       href: "archive.html" },
+    { id: "about",   label: "About",         href: "about.html" },
+  ];
+
+  const here = document.body.dataset.page || "";
+  const navHTML = NAV.map(n =>
+    `<li><a href="${n.href}" class="${n.id === here ? "is-active" : ""}">${n.label}</a></li>`
+  ).join("");
+
+  const mast = `
+<header class="mast">
+  <div class="mast__top container">
+    <div class="mast__meta"><span class="mast__dot"></span> Live · <span data-clock>10:14:02</span> PST</div>
+    <div class="mast__issue">Issue 015 · May 2026</div>
+    <div class="mast__cta"><a class="mast__sub" href="index.html#subscribe">Subscribe →</a></div>
+  </div>
+  <div class="rule rule--ink"></div>
+  <div class="mast__brand container">
+    <a href="index.html" class="brand">
+      <span class="brand__word">anything</span>
+      <span class="brand__over">over</span>
+      <span class="brand__word brand__word--tan">tan</span>
+    </a>
+    <div class="mast__tag">Any color you like — <em>as long as it's over tan.</em></div>
+  </div>
+  <div class="rule"></div>
+  <nav class="mast__nav container">
+    <ul>${navHTML}</ul>
+    <div class="mast__search">⌕  Search the archive</div>
+  </nav>
+  <div class="rule"></div>
+</header>`;
+
+  const foot = `
+<footer class="foot">
+  <div class="foot__top container">
+    <div class="foot__brand">
+      <div class="brand brand--foot">
+        <span class="brand__word">anything</span>
+        <span class="brand__over">over</span>
+        <span class="brand__word brand__word--tan">tan</span>
+      </div>
+      <p class="foot__line">A long-form blog about cars worth buying, written by people who actually drive them. Independent. Reader-funded.</p>
+    </div>
+    <div class="foot__col"><div class="foot__title">Sections</div><ul>
+      <li><a href="archive.html?cat=long">Long Reads</a></li>
+      <li><a href="archive.html?cat=photo">Photo Essays</a></li>
+      <li><a href="archive.html?cat=buying">Buying Guides</a></li>
+      <li><a href="archive.html?cat=culture">Culture</a></li>
+      <li><a href="archive.html?cat=watch">Watchlist</a></li>
+    </ul></div>
+    <div class="foot__col"><div class="foot__title">The Magazine</div><ul>
+      <li><a href="archive.html">Issue 015 (Current)</a></li>
+      <li><a href="archive.html">Archive</a></li>
+      <li><a href="archive.html">Print Annual</a></li>
+      <li><a href="about.html#tip">Submit a tip</a></li>
+    </ul></div>
+    <div class="foot__col"><div class="foot__title">Elsewhere</div><ul>
+      <li><a>Instagram</a></li><li><a>RSS</a></li><li><a>Mastodon</a></li><li><a>Bluesky</a></li>
+    </ul></div>
+  </div>
+  <div class="foot__base container">
+    <span>© 2026 anythingovertan ltd.</span>
+    <span class="foot__motto">Any color you like, as long as it's over tan.</span>
+    <span>Set in Instrument Serif & Helvetica. Photographed on Fujifilm.</span>
+  </div>
+</footer>`;
+
+  // mount
+  const mount = (sel, html) => {
+    const el = document.querySelector(sel);
+    if (el) el.innerHTML = html;
+  };
+  mount("[data-mast]", mast);
+  mount("[data-foot]", foot);
+
+  // live clock
+  const fmtClock = d => d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+  const tickClock = () => {
+    document.querySelectorAll("[data-clock]").forEach(el => el.textContent = fmtClock(new Date()));
+  };
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  // scroll reveal
+  const io = new IntersectionObserver((ents) => {
+    ents.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+  document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+})();
+
+</script>
+<script>
+  // reading-progress bar
+  const bar = document.getElementById("progress-bar");
+  const update = () => {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    const p = max > 0 ? (h.scrollTop / max) * 100 : 0;
+    bar.style.width = p + "%";
+  };
+  document.addEventListener("scroll", update, { passive: true });
+  update();
+</script>
+</body>
+</html>

@@ -1816,7 +1816,7 @@ function Hero({ data }) {
         <aside className="hero__dek rise" style={{ animationDelay: "360ms" }}>
           <p>{data.dek}</p>
           <div className="hero__readMore">
-            <a className="readlink" href="article.html">Read the feature →</a>
+            <a className="readlink" href="article-ftype.html">Read the feature →</a>
           </div>
         </aside>
       </div>
@@ -1842,7 +1842,7 @@ function Ticker({ items }) {
 
 // ─── feature card ──────────────────────────────────────────────
 function FeatureCard({ f, layout }) {
-  const href = f.id === "f1" ? "article.html" : "archive.html";
+  const href = f.id === "f1" ? "article-ftype.html" : "archive.html";
   return (
     <a className={`card card--${layout}`} href={href}>
       <Photo
