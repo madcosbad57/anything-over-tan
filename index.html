@@ -83,6 +83,15 @@
     align-items: flex-end;
     transition: transform 600ms cubic-bezier(.2,.7,.2,1);
   }
+.photo--image { background: oklch(0.22 0.02 60); }
+.photo__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
   .photo--dark {
     background:
       repeating-linear-gradient(
@@ -94,6 +103,8 @@
     color: oklch(0.78 0.015 70);
   }
   .photo__cap {
+  position: relative;
+  z-index: 1;
     font-family: var(--mono);
     font-size: 10px;
     letter-spacing: 0.06em;
@@ -109,6 +120,7 @@
   .photo__crop {
     position: absolute;
     top: 10px; left: 10px;
+  z-index: 1;
     font-family: var(--mono);
     font-size: 9px;
     letter-spacing: 0.08em;
@@ -368,24 +380,25 @@
 
 .hero__body {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr);
-  grid-template-rows: auto auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "title title"
+    "photo dek";
   gap: clamp(20px, 2vw, 32px) clamp(28px, 4vw, 56px);
-  align-items: end;
+  align-items: start;
 }
 .hero__title {
-  grid-column: 1;
-  grid-row: 1 / span 2;
+  grid-area: title;
   font-size: clamp(56px, 9.4vw, 156px);
-  align-self: stretch;
+  align-self: start;
   margin: 0;
+  max-width: 14ch;
   padding-bottom: 8px;
   letter-spacing: -0.015em;
 }
 .hero__title em { color: var(--accent); }
 .hero__photoWrap {
-  grid-column: 2;
-  grid-row: 1;
+  grid-area: photo;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -425,8 +438,7 @@
 }
 .hero__caption-num { color: var(--ink); }
 .hero__dek {
-  grid-column: 2;
-  grid-row: 2;
+  grid-area: dek;
   font-family: var(--serif);
   font-size: clamp(18px, 1.8vw, 26px);
   line-height: 1.35;
@@ -1695,9 +1707,10 @@ window.AOT_DATA = { HERO, TICKER, FEATURES, ESSAY, WATCH, SECTIONS };
 const { useEffect, useState, useRef } = React;
 
 // ─── photo placeholder ─────────────────────────────────────────
-function Photo({ film, subj, loc, frame, dark, className = "", style = {}, children }) {
+function Photo({ film, subj, loc, frame, dark, className = "", style = {}, imageSrc, imageAlt, children }) {
   return (
-    <div className={`photo ${dark ? "photo--dark" : ""} ${className}`} style={style}>
+    <div className={`photo ${dark ? "photo--dark" : ""} ${imageSrc ? "photo--image" : ""} ${className}`} style={style}>
+      {imageSrc && <img src={imageSrc} alt={imageAlt || subj || "Photo"} className="photo__img" />}
       <div className="photo__crop">{frame || "•"}</div>
       <div className="photo__cap">
         <span>{[film, subj].filter(Boolean).join(" · ")}</span>
@@ -1782,6 +1795,8 @@ function Hero({ data }) {
             subj="996.1 Carrera"
             loc={data.shot.loc}
             frame={data.shot.frame}
+            imageSrc="assets/hero-car.png"
+            imageAlt="Red convertible parked in front of vintage service station."
           >
             <div className="hero__overlay">
               <div className="hero__filmStrip">
